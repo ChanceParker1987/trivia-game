@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const newPlayerButton = document.getElementById("new-player");
 
 	// Initialize the game
-	// checkUsername(); Uncomment once completed
+	checkUsername();
 	fetchQuestions();
 	displayScores();
 
@@ -97,11 +97,112 @@ document.addEventListener("DOMContentLoaded", function () {
 	newPlayerButton.addEventListener("click", newPlayer);
 
 	/**
+	 * Sets a cookie with the given name and value.
+	 * @param {string} name - Cookie name.
+	 * @param {string} value - Cookie value.
+	 * @param {number} days - Number of days until the cookie expires.
+	 */
+	function setCookie(name, value, days) {
+		const date = new Date();
+		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+		const expires = "expires=" + date.toUTCString();
+		document.cookie = `${name}=${value}; ${expires}; path=/`;
+	}
+
+	/**
+	 * Retrieves the value of a specific cookie.
+	 * @param {string} name - Name of the cookie to retrieve.
+	 * @returns {string|null} - The value of the cookie or null if not found.
+	 */
+	function getCookie(name) {
+		return document.cookie
+			.split("; ")
+			.find((row) => row.startsWith(name + "="))
+			?.split("=")[1] || null;
+	}
+
+	/**
+	 * Deletes a specific cookie by setting its expiration in the past.
+	 * @param {string} name - Name of the cookie to delete.
+	 */
+	function deleteCookie(name) {
+		document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+	}
+
+	/**
+	 * Checks if a username cookie exists and auto-fills it in the input field.
+	 */
+	function checkUsername() {
+		const savedUsername = getCookie("username");
+		if (savedUsername) {
+			document.getElementById("username").value = savedUsername;
+		}
+	}
+
+	/**
 	 * Handles the trivia form submission.
 	 * @param {Event} event - The submit event.
 	 */
 	function handleFormSubmit(event) {
 		event.preventDefault();
-		//... form submission logic including setting cookies and calculating score
+
+		const usernameInput = document.getElementById("username");
+		const username = usernameInput.value.trim();
+
+		if (username !== "") {
+			setCookie("username", username, 7); // Save cookie for 7 days
+		}
+
+		const score = calculateScore();
+		saveScore(username, score);
+		displayScores();
+	}
+
+	/**
+	 * Calculates the user's score based on selected answers.
+	 * @returns {number} - Total score.
+	 */
+	function calculateScore() {
+		let score = 0;
+		const answers = document.querySelectorAll("input[type=radio]:checked");
+		answers.forEach((input) => {
+			if (input.dataset.correct === "true") {
+				score += 1;
+			}
+		});
+		return score;
+	}
+
+	/**
+	 * Saves the score to localStorage.
+	 * @param {string} username - The user's name.
+	 * @param {number} score - The user's score.
+	 */
+	function saveScore(username, score) {
+		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
+		scores.push({ username, score });
+		localStorage.setItem("triviaScores", JSON.stringify(scores));
+	}
+
+	/**
+	 * Displays the scores stored in localStorage.
+	 */
+	function displayScores() {
+		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
+		const tbody = document.querySelector("#score-table tbody");
+		tbody.innerHTML = "";
+		scores.forEach((entry) => {
+			const row = document.createElement("tr");
+			row.innerHTML = `<td>${entry.username}</td><td>${entry.score}</td>`;
+			tbody.appendChild(row);
+		});
+	}
+
+	/**
+	 * Resets the current session (cookie and form).
+	 */
+	function newPlayer() {
+		deleteCookie("username");
+		document.getElementById("username").value = "";
 	}
 });
