@@ -130,6 +130,24 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
+	 * Updates the UI based on the presence of a username cookie.
+	 * Hides or shows elements depending on whether the user is logged in.
+	 */
+	function updateUIBasedOnSession() {
+		const username = getCookie("username");
+		const usernameInput = document.getElementById("username");
+		const newPlayerButton = document.getElementById("new-player");
+
+		if (username) {
+			usernameInput.classList.add("hidden");
+			newPlayerButton.classList.remove("hidden");
+		} else {
+			usernameInput.classList.remove("hidden");
+			newPlayerButton.classList.add("hidden");
+		}
+	}
+
+	/**
 	 * Checks if a username cookie exists and auto-fills it in the input field.
 	 */
 	function checkUsername() {
@@ -137,6 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (savedUsername) {
 			document.getElementById("username").value = savedUsername;
 		}
+		updateUIBasedOnSession();
 	}
 
 	/**
@@ -156,6 +175,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		const score = calculateScore();
 		saveScore(username, score);
 		displayScores();
+
+		updateUIBasedOnSession();
 	}
 
 	/**
@@ -204,5 +225,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	function newPlayer() {
 		deleteCookie("username");
 		document.getElementById("username").value = "";
+		updateUIBasedOnSession();
 	}
 });
