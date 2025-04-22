@@ -187,17 +187,24 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
-	 * Calculates the user's score based on selected answers.
-	 * @returns {number} - Total score.
+	 * Calculates the user's score based on correct selected answers.
+	 * It loops through all selected radio buttons and checks if they are marked as correct.
+	 *
+	 * @returns {number} The total score based on correct answers
 	 */
 	function calculateScore() {
 		let score = 0;
-		const answers = document.querySelectorAll("input[type=radio]:checked");
-		answers.forEach((input) => {
+
+		// Select all radio inputs that the user has checked
+		const selectedAnswers = document.querySelectorAll("input[type=radio]:checked");
+
+		// Loop through each selected answer and check if it's correct
+		selectedAnswers.forEach((input) => {
 			if (input.dataset.correct === "true") {
 				score += 1;
 			}
 		});
+
 		return score;
 	}
 
