@@ -181,7 +181,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		displayScores(); // Refresh the score table on screen
 
-		// fetchQuestions(); // Optional: restart game with new questions
+		// Optionally reload new questions for next round
+		// fetchQuestions();
 
 		updateUIBasedOnSession(); // Adjust the UI after submitting
 	}
@@ -195,10 +196,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	function calculateScore() {
 		let score = 0;
 
-		// Select all radio inputs that the user has checked
 		const selectedAnswers = document.querySelectorAll("input[type=radio]:checked");
 
-		// Loop through each selected answer and check if it's correct
 		selectedAnswers.forEach((input) => {
 			if (input.dataset.correct === "true") {
 				score += 1;
@@ -216,13 +215,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	 * @param {number} score - The score to be saved.
 	 */
 	function saveScore(username, score) {
-		// Retrieve existing scores from localStorage or start with an empty array
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
-
-		// Add the new score with the username
 		scores.push({ username, score });
-
-		// Save the updated array back to localStorage as a JSON string
 		localStorage.setItem("triviaScores", JSON.stringify(scores));
 	}
 
@@ -232,11 +226,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	 */
 	function displayScores() {
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
-
 		const tbody = document.querySelector("#score-table tbody");
-		tbody.innerHTML = ""; // Clear existing rows
+		tbody.innerHTML = "";
 
-		// Loop through each saved score and insert a row into the table
 		scores.forEach((entry) => {
 			const row = document.createElement("tr");
 			row.innerHTML = `<td>${entry.username}</td><td>${entry.score}</td>`;
@@ -245,12 +237,27 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
-	 * Resets the current session (cookie and form).
+	 * Resets the current session and prepares the game for a new player.
+	 * Clears the username cookie, input field, and game UI.
 	 */
 	function newPlayer() {
-		deleteCookie("username"); // Remove username cookie
-		document.getElementById("username").value = ""; // Clear input
-		updateUIBasedOnSession(); // Show input again, hide "New Player" button
+		deleteCookie("username");
+
+		const usernameInput = document.getElementById("username");
+		usernameInput.value = "";
+		usernameInput.classList.remove("hidden");
+
+		document.getElementById("new-player").classList.add("hidden");
+
+		// Clear any selected answers
+		const selectedRadios = document.querySelectorAll("input[type=radio]:checked");
+		selectedRadios.forEach((radio) => (radio.checked = false));
+
+		// Optionally start a new round of questions
+		fetchQuestions();
+
+		updateUIBasedOnSession();
 	}
 });
+
 
