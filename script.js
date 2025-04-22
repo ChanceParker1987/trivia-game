@@ -161,41 +161,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	/**
 	 * Handles the trivia form submission.
-	 * Manages session cookie, calculates score, stores data, and resets game state.
+	 * Validates username, calculates score, stores it, and updates the UI.
 	 *
 	 * @param {Event} event - The submit event.
 	 */
 	function handleFormSubmit(event) {
-		event.preventDefault(); // Prevents form from refreshing the page
+		event.preventDefault();
 
 		const usernameInput = document.getElementById("username");
 		const username = usernameInput.value.trim();
 
-		if (username !== "") {
-			setCookie("username", username, 7); // Save username in cookie
+		// Prevent submission without a username
+		if (username === "") {
+			alert("Please enter your name before submitting the game.");
+			return;
 		}
 
-		const score = calculateScore(); // Determine how many correct answers
+		setCookie("username", username, 7);
 
-		saveScore(username, score); // Store username and score in localStorage
+		const score = calculateScore();
+		saveScore(username, score);
+		displayScores();
 
-		displayScores(); // Refresh the score table on screen
+		// fetchQuestions(); // Optional: start new round immediately
 
-		// Optionally reload new questions for next round
-		// fetchQuestions();
-
-		updateUIBasedOnSession(); // Adjust the UI after submitting
+		updateUIBasedOnSession();
 	}
 
 	/**
 	 * Calculates the user's score based on correct selected answers.
-	 * It loops through all selected radio buttons and checks if they are marked as correct.
 	 *
-	 * @returns {number} The total score based on correct answers
+	 * @returns {number} The total score
 	 */
 	function calculateScore() {
 		let score = 0;
-
 		const selectedAnswers = document.querySelectorAll("input[type=radio]:checked");
 
 		selectedAnswers.forEach((input) => {
@@ -208,21 +207,22 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
-	 * Saves the user's score to localStorage without overwriting existing scores.
-	 * If previous scores exist, it appends the new one to the array.
+	 * Saves the user's score to localStorage.
 	 *
 	 * @param {string} username - The user's name.
-	 * @param {number} score - The score to be saved.
+	 * @param {number} score - The score to save.
 	 */
 	function saveScore(username, score) {
+		// Don't save if username is missing (extra safeguard)
+		if (!username) return;
+
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
 		scores.push({ username, score });
 		localStorage.setItem("triviaScores", JSON.stringify(scores));
 	}
 
 	/**
-	 * Displays all stored scores in the score table.
-	 * This reads from localStorage and updates the DOM accordingly.
+	 * Displays all saved scores from localStorage in the score table.
 	 */
 	function displayScores() {
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
@@ -237,8 +237,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
-	 * Resets the current session and prepares the game for a new player.
-	 * Clears the username cookie, input field, and game UI.
+	 * Resets the game for a new player.
+	 * Clears the cookie, input, and answers. Loads new questions.
 	 */
 	function newPlayer() {
 		deleteCookie("username");
@@ -249,15 +249,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		document.getElementById("new-player").classList.add("hidden");
 
-		// Clear any selected answers
 		const selectedRadios = document.querySelectorAll("input[type=radio]:checked");
 		selectedRadios.forEach((radio) => (radio.checked = false));
 
-		// Optionally start a new round of questions
-		fetchQuestions();
+		fetchQuestions(); // Load a new set of questions
 
 		updateUIBasedOnSession();
 	}
 });
+
 
 
