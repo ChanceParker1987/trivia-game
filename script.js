@@ -209,23 +209,34 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	/**
-	 * Saves the score to localStorage.
+	 * Saves the user's score to localStorage without overwriting existing scores.
+	 * If previous scores exist, it appends the new one to the array.
+	 *
 	 * @param {string} username - The user's name.
-	 * @param {number} score - The user's score.
+	 * @param {number} score - The score to be saved.
 	 */
 	function saveScore(username, score) {
+		// Retrieve existing scores from localStorage or start with an empty array
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
+
+		// Add the new score with the username
 		scores.push({ username, score });
+
+		// Save the updated array back to localStorage as a JSON string
 		localStorage.setItem("triviaScores", JSON.stringify(scores));
 	}
 
 	/**
-	 * Displays the scores stored in localStorage.
+	 * Displays all stored scores in the score table.
+	 * This reads from localStorage and updates the DOM accordingly.
 	 */
 	function displayScores() {
 		const scores = JSON.parse(localStorage.getItem("triviaScores")) || [];
+
 		const tbody = document.querySelector("#score-table tbody");
-		tbody.innerHTML = "";
+		tbody.innerHTML = ""; // Clear existing rows
+
+		// Loop through each saved score and insert a row into the table
 		scores.forEach((entry) => {
 			const row = document.createElement("tr");
 			row.innerHTML = `<td>${entry.username}</td><td>${entry.score}</td>`;
