@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	const newPlayerButton = document.getElementById("new-player");
 
 	// Initialize the game
-	checkUsername();
-	fetchQuestions();
-	displayScores();
+	checkUsername(); // Check for existing username cookie and update UI
+	fetchQuestions(); // Load trivia questions from API
+	displayScores(); // Display scores from localStorage
 
 	/**
 	 * Fetches trivia questions from the API and displays them.
@@ -149,6 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	/**
 	 * Checks if a username cookie exists and auto-fills it in the input field.
+	 * Then updates the UI based on session state.
 	 */
 	function checkUsername() {
 		const savedUsername = getCookie("username");
@@ -160,23 +161,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	/**
 	 * Handles the trivia form submission.
+	 * Manages session cookie, calculates score, stores data, and resets game state.
+	 *
 	 * @param {Event} event - The submit event.
 	 */
 	function handleFormSubmit(event) {
-		event.preventDefault();
+		event.preventDefault(); // Prevents form from refreshing the page
 
 		const usernameInput = document.getElementById("username");
 		const username = usernameInput.value.trim();
 
 		if (username !== "") {
-			setCookie("username", username, 7); // Save cookie for 7 days
+			setCookie("username", username, 7); // Save username in cookie
 		}
 
-		const score = calculateScore();
-		saveScore(username, score);
-		displayScores();
+		const score = calculateScore(); // Determine how many correct answers
 
-		updateUIBasedOnSession();
+		saveScore(username, score); // Store username and score in localStorage
+
+		displayScores(); // Refresh the score table on screen
+
+		// fetchQuestions(); // Optional: restart game with new questions
+
+		updateUIBasedOnSession(); // Adjust the UI after submitting
 	}
 
 	/**
@@ -223,8 +230,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	 * Resets the current session (cookie and form).
 	 */
 	function newPlayer() {
-		deleteCookie("username");
-		document.getElementById("username").value = "";
-		updateUIBasedOnSession();
+		deleteCookie("username"); // Remove username cookie
+		document.getElementById("username").value = ""; // Clear input
+		updateUIBasedOnSession(); // Show input again, hide "New Player" button
 	}
 });
+
